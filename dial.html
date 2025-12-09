@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daxor - Normalized Hematocrit Interactive Tool</title>
+    <style>
+        :root {
+            /* Palette */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F5F7FA;
+            --text-primary: #1B3B6F;
+            --text-secondary: #34495E;
+            --success: #27AE60;
+            --warning: #E67E22;
+            --danger: #C0392B;
+            --rbc-color: #8B0000;
+            --plasma-color: #D4A017;
+            --border: #E0E0E0;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation; /* Optimizes for touch */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent scroll on app-like feel */
+        }
+
+        /* --- Header --- */
+        header {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 24px;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .logo span { color: var(--danger); }
+
+        .tagline {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background-color: var(--bg-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Column 1: Test Tube --- */
+        .vis-container {
+            justify-content: flex-end;
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .tube-label {
+            position: absolute;
+            top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .test-tube-bg {
+            width: 80px;
+            height: 400px; /* Max height representation */
+            border: 4px solid var(--text-secondary);
+            border-top: none;
+            border-radius: 0 0 40px 40px;
+            position: relative;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        /* The actual fluid container that changes height */
+        .fluid-column {
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: height 0.2s ease-out;
+            display: flex;
+            flex-direction: column-reverse; /* Stack RBC at bottom */
+        }
+
+        .layer-rbc {
+            width: 100%;
+            background-color: var(--rbc-color);
+            /* Fixed height in simulation logic, but flex in CSS */
+            transition: height 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .layer-plasma {
+            width: 100%;
+            background-color: var(--plasma-color);
+            transition: height 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5d4300;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .vol-indicator {
+            position: absolute;
+            left: 90px;
+            bottom: 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-primary);
+            transition: bottom 0.2s ease-out;
+            white-space: nowrap;
+        }
+        .vol-indicator::before {
+            content: "← ";
+        }
+
+        /* --- Column 2: Controls --- */
+        .controls-container {
+            justify-content: space-between;
+        }
+
+        .hct-display {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .hct-label {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .hct-value {
+            font-size: 82px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .hct-unit {
+            font-size: 32px;
+            color: var(--text-secondary);
+        }
+
+        .status-message {
+            height: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--success);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Gauge */
+        .gauge-wrapper {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .gauge-bar {
+            height: 24px;
+            width: 100%;
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .zone {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        .zone-hypo { background: var(--danger); width: 20%; } /* > 42 */
+        .zone-target { background: var(--success); width: 25%; } /* 34-42 */
+        .zone-hyper { background: var(--danger); width: 55%; } /* < 34 */
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .needle {
+            position: absolute;
+            top: -5px;
+            width: 4px;
+            height: 34px;
+            background: var(--text-primary);
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: left 0.2s ease-out;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* Slider */
+        .slider-group {
+            width: 100%;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .slider-label {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 36px;
+            width: 36px;
+            border-radius: 50%;
+            background: var(--plasma-color);
+            border: 4px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            margin-top: -14px;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #ddd;
+            border-radius: 5px;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .metric-box {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .m-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
+        .m-value { font-size: 22px; font-weight: bold; color: var(--text-primary); }
+        .m-unit { font-size: 14px; font-weight: normal; color: var(--text-secondary); }
+
+        .formula-box {
+            margin-top: 20px;
+            padding: 10px;
+            background: #E8F0FE;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #D2E3FC;
+        }
+
+        /* --- Column 3: Education --- */
+        .edu-container {
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+
+        .edu-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .edu-block {
+            margin-bottom: 20px;
+        }
+
+        .edu-block h4 {
+            color: var(--warning);
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .edu-block p {
+            line-height: 1.5;
+            font-size: 16px;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 120px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Simple CSS Graph for educational panel */
+        .zigzag {
+            width: 80%;
+            height: 40px;
+            border-bottom: 2px dashed #ccc;
+            position: relative;
+        }
+        .zigzag::after {
+            content: "nHct (Stable)";
+            position: absolute;
+            right: 0;
+            bottom: -20px;
+            font-size: 10px;
+            color: #666;
+        }
+        .zigzag-line {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" preserveAspectRatio="none"><path d="M0,10 L10,0 L20,15 L30,5 L40,18 L50,8 L60,15 L70,5 L80,12 L90,2 L100,10" stroke="%23D4A017" fill="none" stroke-width="2"/></svg>');
+            background-size: 100% 100%;
+        }
+
+        /* --- Responsive for Portrait --- */
+        @media (max-width: 1024px) and (orientation: portrait) {
+            main {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+            }
+            .vis-container {
+                flex-direction: row;
+                height: 300px;
+                padding-bottom: 0;
+                justify-content: center;
+                align-items: center;
+            }
+            .test-tube-bg {
+                height: 250px;
+                transform: scale(1.2);
+            }
+            .vol-indicator {
+                left: 55%; 
+                bottom: auto;
+                top: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">DAXOR<span>.</span></div>
+    <div class="tagline">Volume is Vital</div>
+</header>
+
+<main>
+    <!-- 1. Visualization -->
+    <section class="card vis-container">
+        <div class="tube-label">Total Volume</div>
+        
+        <div class="test-tube-bg">
+            <div class="fluid-column" id="fluidColumn">
+                <div class="layer-plasma" id="plasmaLayer">Plasma</div>
+                <div class="layer-rbc" id="rbcLayer">RBC</div>
+            </div>
+        </div>
+
+        <div class="vol-indicator" id="volIndicator">6300 mL</div>
+    </section>
+
+    <!-- 2. Controls & Metrics -->
+    <section class="card controls-container">
+        <div style="width: 100%">
+            <div class="hct-display">
+                <div class="hct-label">Current Hematocrit</div>
+                <span class="hct-value" id="hctValue">28.6</span><span class="hct-unit">%</span>
+                <div class="status-message" id="statusMsg">Target Achieved - Normovolemic</div>
+            </div>
+
+            <div class="gauge-wrapper">
+                <!-- 
+                   Gauge Logic (Left to Right based on prompt description):
+                   Left: Hypo (>42%) | Center: Target (34-42) | Right: Hyper (<34%)
+                   Note: Hct is high on left, low on right.
+                -->
+                <div class="gauge-bar">
+                    <div class="zone zone-hypo">HYPO</div>
+                    <div class="zone zone-target">TARGET</div>
+                    <div class="zone zone-hyper">HYPERVOLEMIC</div>
+                    <div class="needle" id="gaugeNeedle"></div>
+                </div>
+                <div class="gauge-labels">
+                    <span>50%</span>
+                    <span style="margin-left: -5%">42%</span>
+                    <span style="margin-right: -25%">34%</span>
+                    <span>20%</span>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <label class="slider-label">Adjust Plasma Volume</label>
+                <input type="range" id="plasmaSlider" min="2000" max="5000" value="4500" step="10">
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="m-label">Plasma Volume</div>
+                    <div class="m-value" style="color: var(--plasma-color)"><span id="plasmaVal">4500</span> <span class="m-unit">mL</span></div>
+                </div>
+                <div class="metric-box">
+                    <div class="m-label">RBC Volume (Fixed)</div>
+                    <div class="m-value" style="color: var(--rbc-color)">1800 <span class="m-unit">mL</span></div>
+                </div>
+                <div class="metric-box">
+                    <div class="m-label">Total Blood Volume</div>
+                    <div class="m-value"><span id="totalVal">6300</span> <span class="m-unit">mL</span></div>
+                </div>
+                <div class="metric-box" style="border: 2px solid var(--success)">
+                    <div class="m-label">nHct Target</div>
+                    <div class="m-value" style="color: var(--success)">38.0 <span class="m-unit">%</span></div>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                Hct = RBC (1800) ÷ Total (<span id="calcTotal">6300</span>)
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Education -->
+    <section class="card edu-container">
+        <div class="edu-title">Why nHct?</div>
+        
+        <div class="edu-block">
+            <h4>The Problem: Plasma Refill</h4>
+            <p>Traditional Hematocrit is unreliable during diuresis because plasma refills from the interstitial space between doses.</p>
+            <div class="chart-placeholder">
+                <div class="zigzag">
+                    <div class="zigzag-line"></div>
+                </div>
+            </div>
+            <p style="font-size: 14px; color: #666; text-align: center; margin-top: 5px;">Plasma fluctuates, but RBC mass is constant.</p>
+        </div>
+
+        <div class="edu-block">
+            <h4>The Solution: Normalized Hct</h4>
+            <p>nHct calculates the endpoint based on the patient's <strong>fixed Red Blood Cell mass</strong>. By targeting nHct, you ensure the patient reaches true euvolemia regardless of plasma shifting.</p>
+        </div>
+
+        <div class="edu-block" style="background: #FFF8E1; padding: 10px; border-radius: 8px; border-left: 4px solid var(--plasma-color);">
+            <p style="margin:0; font-size: 14px; font-weight: bold;">Key Insight:</p>
+            <p style="margin:5px 0 0 0; font-size: 14px;">Removing plasma reduces Total Volume, which naturally <strong>raises</strong> Hematocrit percentages.</p>
+        </div>
+    </section>
+</main>
+
+<script>
+    // Constants
+    const rbcVolume = 1800;
+    const targetHctMin = 34;
+    const targetHctMax = 42;
+    const maxTotalDisplay = 7000; // For visual scaling of the tube
+
+    // DOM Elements
+    const slider = document.getElementById('plasmaSlider');
+    const plasmaValDisplay = document.getElementById('plasmaVal');
+    const totalValDisplay = document.getElementById('totalVal');
+    const hctValueDisplay = document.getElementById('hctValue');
+    const fluidColumn = document.getElementById('fluidColumn');
+    const rbcLayer = document.getElementById('rbcLayer');
+    const plasmaLayer = document.getElementById('plasmaLayer');
+    const volIndicator = document.getElementById('volIndicator');
+    const calcTotalDisplay = document.getElementById('calcTotal');
+    const gaugeNeedle = document.getElementById('gaugeNeedle');
+    const statusMsg = document.getElementById('statusMsg');
+
+    function updateApp() {
+        // Get Input
+        const plasmaVolume = parseInt(slider.value);
+        
+        // Calculations
+        const totalVolume = rbcVolume + plasmaVolume;
+        const currentHct = (rbcVolume / totalVolume) * 100;
+
+        // Update Text Metrics
+        plasmaValDisplay.textContent = plasmaVolume;
+        totalValDisplay.textContent = totalVolume;
+        calcTotalDisplay.textContent = totalVolume;
+        hctValueDisplay.textContent = currentHct.toFixed(1);
+
+        // Update Tube Visualization
+        // Calculate percentages relative to the *container max height* (simulating absolute volume)
+        const totalHeightPct = (totalVolume / maxTotalDisplay) * 100;
+        const rbcHeightPct = (rbcVolume / totalVolume) * 100; // % within the fluid column
+        const plasmaHeightPct = (plasmaVolume / totalVolume) * 100; // % within the fluid column
+
+        fluidColumn.style.height = `${totalHeightPct}%`;
+        
+        // Inside the flex container, we set flex-basis or height percentages
+        rbcLayer.style.height = `${rbcHeightPct}%`;
+        plasmaLayer.style.height = `${plasmaHeightPct}%`;
+
+        // Update Indicator Position (follow the top of fluid)
+        volIndicator.style.bottom = `${totalHeightPct}%`;
+        volIndicator.innerHTML = `&larr; ${totalVolume} mL`;
+
+        // Update Gauge Needle
+        // Range: 50% (Left) to 20% (Right)
+        // Map currentHct to 0-100% of the bar width
+        // Min (Right) = 20, Max (Left) = 50. Span = 30.
+        // Hct 20 -> 100% Left property (actually Right side)
+        // Let's calculate Left % position:
+        // Hct 50 -> Left: 0%
+        // Hct 20 -> Left: 100%
+        // Formula: ((50 - Hct) / 30) * 100
+        
+        let needlePos = ((50 - currentHct) / 30) * 100;
+        
+        // Clamp needle
+        if (needlePos < 0) needlePos = 0;
+        if (needlePos > 100) needlePos = 100;
+        
+        gaugeNeedle.style.left = `${needlePos}%`;
+
+        // Success State
+        if (currentHct >= targetHctMin && currentHct <= targetHctMax) {
+            statusMsg.style.opacity = '1';
+            hctValueDisplay.style.color = 'var(--success)';
+        } else if (currentHct > targetHctMax) {
+            statusMsg.style.opacity = '0'; // Or change text to "Hypovolemic"
+            hctValueDisplay.style.color = 'var(--danger)';
+        } else {
+            statusMsg.style.opacity = '0';
+            hctValueDisplay.style.color = 'var(--text-primary)';
+        }
+    }
+
+    // Initialize
+    slider.addEventListener('input', updateApp);
+    
+    // Initial call
+    updateApp();
+
+</script>
+
+</body>
+</html>
