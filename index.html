@@ -49,14 +49,16 @@
         }
 
         .logo {
-            font-weight: 900;
-            font-size: 24px;
-            color: var(--text-primary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            height: 50px;
+            display: flex;
+            align-items: center;
         }
-        
-        .logo span { color: var(--danger); }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+        }
 
         .tagline {
             font-size: 14px;
@@ -417,7 +419,9 @@
 <body>
 
 <header>
-    <div class="logo">DAXOR<span>.</span></div>
+    <div class="logo">
+        <img src="logo.png" alt="DAXOR">
+    </div>
     <div class="tagline">Volume is Vital</div>
 </header>
 
