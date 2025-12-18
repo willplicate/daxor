@@ -66,13 +66,43 @@
             font-weight: 500;
         }
 
+        /* Scenario Dropdown */
+        .scenario-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scenario-selector label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .scenario-selector select {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: white;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        .scenario-selector select:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+
         /* --- Main Layout --- */
         main {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr;
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: 0.8fr 1.5fr 1fr;
+            gap: 15px;
+            padding: 15px;
             background-color: var(--bg-secondary);
         }
 
@@ -80,7 +110,7 @@
         .card {
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -89,25 +119,26 @@
 
         /* --- Column 1: Test Tube --- */
         .vis-container {
-            justify-content: flex-end;
+            justify-content: center;
             position: relative;
-            padding-bottom: 40px;
+            padding-bottom: 20px;
+            padding-top: 10px;
         }
 
         .tube-label {
             position: absolute;
-            top: 20px;
+            top: 10px;
             font-size: 18px;
             font-weight: bold;
             color: var(--text-primary);
         }
 
         .test-tube-bg {
-            width: 80px;
-            height: 400px; /* Max height representation */
+            width: 100px;
+            height: 450px; /* Max height representation */
             border: 4px solid var(--text-secondary);
             border-top: none;
-            border-radius: 0 0 40px 40px;
+            border-radius: 0 0 45px 45px;
             position: relative;
             overflow: hidden;
             background: #f0f0f0;
@@ -152,16 +183,30 @@
 
         .vol-indicator {
             position: absolute;
-            left: 90px;
+            left: 115px;
             bottom: 0;
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 18px;
+            font-weight: 800;
             color: var(--text-primary);
-            transition: bottom 0.2s ease-out;
+            transition: bottom 0.2s ease-out, color 0.3s ease-out, background-color 0.3s ease-out;
             white-space: nowrap;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 3px solid var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .vol-indicator.converged {
+            color: var(--success);
+            border-color: var(--success);
+            background: #D4EDDA;
         }
         .vol-indicator::before {
             content: "← ";
+            font-size: 24px;
+        }
+        .vol-indicator.add-plasma::before {
+            content: "→ ";
         }
 
         /* --- Column 2: Controls --- */
@@ -170,25 +215,46 @@
         }
 
         .hct-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+
+        .hct-column {
             text-align: center;
-            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            transition: background-color 0.3s;
+        }
+
+        .hct-column.converged {
+            background: #D4EDDA;
+            border: 2px solid var(--success);
         }
 
         .hct-label {
-            font-size: 18px;
+            font-size: 16px;
             color: var(--text-secondary);
             margin-bottom: 5px;
+            font-weight: 600;
         }
 
         .hct-value {
-            font-size: 82px;
+            font-size: 48px;
             font-weight: 800;
             color: var(--text-primary);
             line-height: 1;
+            transition: color 0.3s;
+        }
+
+        .hct-column.converged .hct-value {
+            color: var(--success);
         }
 
         .hct-unit {
-            font-size: 32px;
+            font-size: 28px;
             color: var(--text-secondary);
         }
 
@@ -200,6 +266,7 @@
             color: var(--success);
             opacity: 0;
             transition: opacity 0.3s;
+            text-align: center;
         }
 
         /* Gauge */
@@ -226,16 +293,17 @@
             color: white;
             font-weight: bold;
         }
-        .zone-hypo { background: var(--danger); width: 20%; } /* > 42 */
+        .zone-hypo { background: var(--danger); width: 37.5%; } /* > 42 */
         .zone-target { background: var(--success); width: 25%; } /* 34-42 */
-        .zone-hyper { background: var(--danger); width: 55%; } /* < 34 */
+        .zone-hyper { background: var(--danger); width: 37.5%; } /* < 34 */
 
         .gauge-labels {
             display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-top: 8px;
         }
 
         .needle {
@@ -300,24 +368,54 @@
         .metrics-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .metric-box {
             background: var(--bg-secondary);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
+            text-align: left;
+        }
+
+        .metric-box.highlight {
+            border: 2px solid var(--success);
+        }
+
+        .m-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 8px;
             text-align: center;
         }
 
-        .m-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
-        .m-value { font-size: 22px; font-weight: bold; color: var(--text-primary); }
-        .m-unit { font-size: 14px; font-weight: normal; color: var(--text-secondary); }
+        .m-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .m-label {
+            color: var(--text-secondary);
+        }
+
+        .m-value {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .m-value.excess { color: var(--danger); }
+        .m-value.deficit { color: var(--warning); }
+        .m-value.ideal { color: var(--success); }
 
         .formula-box {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 10px;
             background: #E8F0FE;
             border-radius: 8px;
@@ -328,6 +426,55 @@
             border: 1px solid #D2E3FC;
         }
 
+        /* Refill Toggle in Header */
+        .refill-toggle-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .refill-toggle-header input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .refill-toggle-header label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Refill Toast Notification */
+        .refill-toast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--success);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .refill-toast.show {
+            opacity: 1;
+        }
+
+        /* Position refill toast relative to plasma card */
+        .metric-box {
+            position: relative;
+        }
+
         /* --- Column 3: Education --- */
         .edu-container {
             align-items: flex-start;
@@ -335,35 +482,37 @@
         }
 
         .edu-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             color: var(--text-primary);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .edu-block {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .edu-block h4 {
             color: var(--warning);
-            margin-bottom: 5px;
-            font-size: 18px;
+            margin-bottom: 3px;
+            margin-top: 0;
+            font-size: 16px;
         }
 
         .edu-block p {
-            line-height: 1.5;
-            font-size: 16px;
+            line-height: 1.3;
+            font-size: 14px;
+            margin: 5px 0;
         }
 
         .chart-placeholder {
             width: 100%;
-            height: 120px;
+            height: 100px;
             background: white;
             border: 1px solid var(--border);
             border-radius: 8px;
             position: relative;
-            margin-top: 10px;
+            margin-top: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -422,6 +571,15 @@
     <div class="logo">
         <img src="logo.png" alt="DAXOR">
     </div>
+    <div class="scenario-selector">
+        <label for="scenarioSelect">Patient Scenario:</label>
+        <select id="scenarioSelect">
+            <option value="scenario1">Scenario 1: Default</option>
+            <option value="scenario2">Scenario 2: Moderate Hypervolemia</option>
+            <option value="scenario3">Scenario 3: Severe Hypervolemia</option>
+            <option value="scenario4">Scenario 4: Hypovolemia</option>
+        </select>
+    </div>
     <div class="tagline">Volume is Vital</div>
 </header>
 
@@ -432,8 +590,8 @@
         
         <div class="test-tube-bg">
             <div class="fluid-column" id="fluidColumn">
-                <div class="layer-plasma" id="plasmaLayer">Plasma</div>
                 <div class="layer-rbc" id="rbcLayer">RBC</div>
+                <div class="layer-plasma" id="plasmaLayer">Plasma</div>
             </div>
         </div>
 
@@ -444,10 +602,20 @@
     <section class="card controls-container">
         <div style="width: 100%">
             <div class="hct-display">
-                <div class="hct-label">Current Hematocrit</div>
-                <span class="hct-value" id="hctValue">28.6</span><span class="hct-unit">%</span>
-                <div class="status-message" id="statusMsg">Target Achieved - Normovolemic</div>
+                <div class="hct-column" id="peripheralHctColumn">
+                    <div class="hct-label">Peripheral Hct</div>
+                    <div>
+                        <span class="hct-value" id="peripheralHctValue">28.6</span><span class="hct-unit">%</span>
+                    </div>
+                </div>
+                <div class="hct-column" id="normalizedHctColumn">
+                    <div class="hct-label">Normalized Hct (nHct)</div>
+                    <div>
+                        <span class="hct-value" id="normalizedHctValue">38.0</span><span class="hct-unit">%</span>
+                    </div>
+                </div>
             </div>
+            <div class="status-message" id="statusMsg">Target Achieved - Converged!</div>
 
             <div class="gauge-wrapper">
                 <!-- 
@@ -456,16 +624,13 @@
                    Note: Hct is high on left, low on right.
                 -->
                 <div class="gauge-bar">
-                    <div class="zone zone-hypo">HYPO</div>
+                    <div class="zone zone-hypo">HYPOVOLEMIC</div>
                     <div class="zone zone-target">TARGET</div>
                     <div class="zone zone-hyper">HYPERVOLEMIC</div>
                     <div class="needle" id="gaugeNeedle"></div>
                 </div>
                 <div class="gauge-labels">
-                    <span>50%</span>
-                    <span style="margin-left: -5%">42%</span>
-                    <span style="margin-right: -25%">34%</span>
-                    <span>20%</span>
+                    <span id="targetLabel">38.0%</span>
                 </div>
             </div>
 
@@ -475,21 +640,61 @@
             </div>
 
             <div class="metrics-grid">
-                <div class="metric-box">
-                    <div class="m-label">Plasma Volume</div>
-                    <div class="m-value" style="color: var(--plasma-color)"><span id="plasmaVal">4500</span> <span class="m-unit">mL</span></div>
+                <div class="metric-box" id="plasmaCard">
+                    <div class="m-title">Plasma Volume</div>
+                    <div class="m-row">
+                        <span class="m-label">BVA Result:</span>
+                        <span class="m-value" style="color: var(--plasma-color)"><span id="plasmaVal">4500</span> mL</span>
+                    </div>
+                    <div class="m-row">
+                        <span class="m-label">Patient Ideal:</span>
+                        <span class="m-value" id="plasmaIdeal">2961 mL</span>
+                    </div>
+                    <div class="m-row">
+                        <span class="m-label">Excess/Deficit:</span>
+                        <span class="m-value" id="plasmaDeviation">+1539 mL</span>
+                    </div>
+                    <!-- Refill Toast Notification inside plasma card -->
+                    <div class="refill-toast" id="refillToast">plasma refilled!</div>
                 </div>
                 <div class="metric-box">
-                    <div class="m-label">RBC Volume (Fixed)</div>
-                    <div class="m-value" style="color: var(--rbc-color)">1800 <span class="m-unit">mL</span></div>
+                    <div class="m-title">RBC Volume</div>
+                    <div class="m-row">
+                        <span class="m-label">BVA Result:</span>
+                        <span class="m-value" style="color: var(--rbc-color)">1800 mL</span>
+                    </div>
+                    <div class="m-row">
+                        <span class="m-label">Patient Ideal:</span>
+                        <span class="m-value">1800 mL</span>
+                    </div>
+                    <div class="m-row">
+                        <span class="m-label">Deviation:</span>
+                        <span class="m-value ideal">0 mL</span>
+                    </div>
                 </div>
                 <div class="metric-box">
-                    <div class="m-label">Total Blood Volume</div>
-                    <div class="m-value"><span id="totalVal">6300</span> <span class="m-unit">mL</span></div>
+                    <div class="m-title">Total Blood Volume</div>
+                    <div class="m-row">
+                        <span class="m-label">BVA Result:</span>
+                        <span class="m-value"><span id="totalVal">6300</span> mL</span>
+                    </div>
+                    <div class="m-row">
+                        <span class="m-label">Patient Ideal:</span>
+                        <span class="m-value" id="totalIdeal">4761 mL</span>
+                    </div>
+                    <div class="m-row">
+                        <span class="m-label">Excess/Deficit:</span>
+                        <span class="m-value" id="totalDeviation">+1539 mL</span>
+                    </div>
                 </div>
-                <div class="metric-box" style="border: 2px solid var(--success)">
-                    <div class="m-label">nHct Target</div>
-                    <div class="m-value" style="color: var(--success)">38.0 <span class="m-unit">%</span></div>
+                <div class="metric-box highlight">
+                    <div class="m-title">nHct Target</div>
+                    <div class="m-row" style="justify-content: center;">
+                        <span class="m-value ideal" style="font-size: 24px;">38.0%</span>
+                    </div>
+                    <div class="m-row" style="justify-content: center; margin-top: 8px;">
+                        <span class="m-label" style="font-size: 11px;">Monitor to this value</span>
+                    </div>
                 </div>
             </div>
 
@@ -512,6 +717,11 @@
                 </div>
             </div>
             <p style="font-size: 14px; color: #666; text-align: center; margin-top: 5px;">Plasma fluctuates, but RBC mass is constant.</p>
+
+            <div class="refill-toggle-header" style="justify-content: center; margin-top: 10px;">
+                <input type="checkbox" id="refillToggle" checked>
+                <label for="refillToggle">💧 Plasma Refill (15s)</label>
+            </div>
         </div>
 
         <div class="edu-block">
@@ -521,23 +731,60 @@
 
         <div class="edu-block" style="background: #FFF8E1; padding: 10px; border-radius: 8px; border-left: 4px solid var(--plasma-color);">
             <p style="margin:0; font-size: 14px; font-weight: bold;">Key Insight:</p>
-            <p style="margin:5px 0 0 0; font-size: 14px;">Removing plasma reduces Total Volume, which naturally <strong>raises</strong> Hematocrit percentages.</p>
+            <p style="margin:5px 0 0 0; font-size: 14px;">Removing plasma reduces Total Intravascular Volume, which naturally <strong>raises</strong> Hematocrit percentages.</p>
         </div>
     </section>
 </main>
 
 <script>
-    // Constants
-    const rbcVolume = 1800;
+    // Scenario Definitions
+    const scenarios = {
+        scenario1: {
+            name: "Default",
+            rbcVolume: 1800,
+            normalizedHct: 38.0,
+            initialPlasma: 4500
+        },
+        scenario2: {
+            name: "Moderate Hypervolemia",
+            rbcVolume: 1800,
+            normalizedHct: 38.0,
+            initialPlasma: 4200
+        },
+        scenario3: {
+            name: "Severe Hypervolemia",
+            rbcVolume: 1800,
+            normalizedHct: 38.0,
+            initialPlasma: 4800
+        },
+        scenario4: {
+            name: "Hypovolemia",
+            rbcVolume: 1800,
+            normalizedHct: 38.0,
+            initialPlasma: 2500
+        }
+    };
+
+    // Current scenario values (will be updated when scenario changes)
+    let rbcVolume = 1800;
+    let normalizedHct = 38.0;
     const targetHctMin = 34;
     const targetHctMax = 42;
+    const convergenceTolerance = 0.5; // Within 0.5% is considered converged
     const maxTotalDisplay = 7000; // For visual scaling of the tube
 
     // DOM Elements
     const slider = document.getElementById('plasmaSlider');
     const plasmaValDisplay = document.getElementById('plasmaVal');
     const totalValDisplay = document.getElementById('totalVal');
-    const hctValueDisplay = document.getElementById('hctValue');
+    const plasmaIdealDisplay = document.getElementById('plasmaIdeal');
+    const totalIdealDisplay = document.getElementById('totalIdeal');
+    const plasmaDeviationDisplay = document.getElementById('plasmaDeviation');
+    const totalDeviationDisplay = document.getElementById('totalDeviation');
+    const peripheralHctDisplay = document.getElementById('peripheralHctValue');
+    const normalizedHctDisplay = document.getElementById('normalizedHctValue');
+    const peripheralHctColumn = document.getElementById('peripheralHctColumn');
+    const normalizedHctColumn = document.getElementById('normalizedHctColumn');
     const fluidColumn = document.getElementById('fluidColumn');
     const rbcLayer = document.getElementById('rbcLayer');
     const plasmaLayer = document.getElementById('plasmaLayer');
@@ -545,20 +792,76 @@
     const calcTotalDisplay = document.getElementById('calcTotal');
     const gaugeNeedle = document.getElementById('gaugeNeedle');
     const statusMsg = document.getElementById('statusMsg');
+    const targetLabel = document.getElementById('targetLabel');
+    const refillToggle = document.getElementById('refillToggle');
+    const refillToast = document.getElementById('refillToast');
+    const scenarioSelect = document.getElementById('scenarioSelect');
+
+    // Refill state
+    let refillInterval = null;
+    let isSliderActive = false;
+
+    // Load scenario
+    function loadScenario(scenarioId) {
+        const scenario = scenarios[scenarioId];
+
+        // Update global values
+        rbcVolume = scenario.rbcVolume;
+        normalizedHct = scenario.normalizedHct;
+
+        // Update slider value
+        slider.value = scenario.initialPlasma;
+
+        // Update target label
+        targetLabel.textContent = `${normalizedHct.toFixed(1)}%`;
+
+        // Update the display
+        updateApp();
+    }
 
     function updateApp() {
         // Get Input
         const plasmaVolume = parseInt(slider.value);
-        
+
         // Calculations
         const totalVolume = rbcVolume + plasmaVolume;
-        const currentHct = (rbcVolume / totalVolume) * 100;
+        const peripheralHct = (rbcVolume / totalVolume) * 100;
+
+        // Calculate target total volume (where peripheral Hct = normalized Hct)
+        const targetTotalVolume = rbcVolume / (normalizedHct / 100);
+        const targetPlasmaVolume = targetTotalVolume - rbcVolume;
+
+        // Calculate deviations
+        const plasmaDeviation = plasmaVolume - targetPlasmaVolume;
+        const totalDeviation = totalVolume - targetTotalVolume;
 
         // Update Text Metrics
         plasmaValDisplay.textContent = plasmaVolume;
         totalValDisplay.textContent = totalVolume;
         calcTotalDisplay.textContent = totalVolume;
-        hctValueDisplay.textContent = currentHct.toFixed(1);
+        peripheralHctDisplay.textContent = peripheralHct.toFixed(1);
+        normalizedHctDisplay.textContent = normalizedHct.toFixed(1);
+
+        // Update Ideal Values and Deviations
+        plasmaIdealDisplay.textContent = `${Math.round(targetPlasmaVolume)} mL`;
+        totalIdealDisplay.textContent = `${Math.round(targetTotalVolume)} mL`;
+
+        // Format deviation with + or - sign and color
+        const formatDeviation = (deviation, element) => {
+            const sign = deviation >= 0 ? '+' : '';
+            element.textContent = `${sign}${Math.round(deviation)} mL`;
+            element.classList.remove('excess', 'deficit', 'ideal');
+            if (Math.abs(deviation) < 10) {
+                element.classList.add('ideal');
+            } else if (deviation > 0) {
+                element.classList.add('excess');
+            } else {
+                element.classList.add('deficit');
+            }
+        };
+
+        formatDeviation(plasmaDeviation, plasmaDeviationDisplay);
+        formatDeviation(totalDeviation, totalDeviationDisplay);
 
         // Update Tube Visualization
         // Calculate percentages relative to the *container max height* (simulating absolute volume)
@@ -567,51 +870,149 @@
         const plasmaHeightPct = (plasmaVolume / totalVolume) * 100; // % within the fluid column
 
         fluidColumn.style.height = `${totalHeightPct}%`;
-        
+
         // Inside the flex container, we set flex-basis or height percentages
         rbcLayer.style.height = `${rbcHeightPct}%`;
         plasmaLayer.style.height = `${plasmaHeightPct}%`;
 
-        // Update Indicator Position (follow the top of fluid)
+        // Update Indicator Position and Arrow Direction
         volIndicator.style.bottom = `${totalHeightPct}%`;
-        volIndicator.innerHTML = `&larr; ${totalVolume} mL`;
+
+        // Dynamic arrow direction based on target
+        if (totalVolume < targetTotalVolume) {
+            // Below target - need more plasma (or wait for refill)
+            volIndicator.classList.add('add-plasma');
+            volIndicator.innerHTML = `${totalVolume} mL`;
+        } else {
+            // Above target - need to remove plasma
+            volIndicator.classList.remove('add-plasma');
+            volIndicator.innerHTML = `${totalVolume} mL`;
+        }
 
         // Update Gauge Needle
         // Range: 50% (Left) to 20% (Right)
-        // Map currentHct to 0-100% of the bar width
-        // Min (Right) = 20, Max (Left) = 50. Span = 30.
-        // Hct 20 -> 100% Left property (actually Right side)
-        // Let's calculate Left % position:
-        // Hct 50 -> Left: 0%
-        // Hct 20 -> Left: 100%
-        // Formula: ((50 - Hct) / 30) * 100
-        
-        let needlePos = ((50 - currentHct) / 30) * 100;
-        
+        // Map peripheralHct to 0-100% of the bar width
+        let needlePos = ((50 - peripheralHct) / 30) * 100;
+
         // Clamp needle
         if (needlePos < 0) needlePos = 0;
         if (needlePos > 100) needlePos = 100;
-        
+
         gaugeNeedle.style.left = `${needlePos}%`;
 
-        // Success State
-        if (currentHct >= targetHctMin && currentHct <= targetHctMax) {
+        // Check for convergence
+        const isConverged = Math.abs(peripheralHct - normalizedHct) <= convergenceTolerance;
+        const isInTargetZone = peripheralHct >= targetHctMin && peripheralHct <= targetHctMax;
+
+        // Update visual state based on convergence
+        if (isConverged && isInTargetZone) {
+            // Both converged and in target zone - SUCCESS!
+            peripheralHctColumn.classList.add('converged');
+            normalizedHctColumn.classList.add('converged');
+            volIndicator.classList.add('converged');
             statusMsg.style.opacity = '1';
-            hctValueDisplay.style.color = 'var(--success)';
-        } else if (currentHct > targetHctMax) {
-            statusMsg.style.opacity = '0'; // Or change text to "Hypovolemic"
-            hctValueDisplay.style.color = 'var(--danger)';
+            statusMsg.textContent = 'Target Achieved - Converged!';
         } else {
+            // Not converged or not in target zone
+            peripheralHctColumn.classList.remove('converged');
+            normalizedHctColumn.classList.remove('converged');
+            volIndicator.classList.remove('converged');
             statusMsg.style.opacity = '0';
-            hctValueDisplay.style.color = 'var(--text-primary)';
         }
     }
 
-    // Initialize
+    // Calculate plasma refill amount based on volemic status
+    function calculateRefillAmount() {
+        const plasmaVolume = parseInt(slider.value);
+        const currentTotalVolume = rbcVolume + plasmaVolume;
+        const targetTotalVolume = rbcVolume / (normalizedHct / 100);
+        const deviation = currentTotalVolume - targetTotalVolume;
+        const deviationPercent = (deviation / targetTotalVolume) * 100;
+
+        const nearTargetThreshold = 10; // ±10% of ideal
+
+        let refillAmount = 0;
+
+        if (deviationPercent > nearTargetThreshold) {
+            // HYPERVOLEMIC: >10% above target - no refill
+            refillAmount = 0;
+        } else if (Math.abs(deviationPercent) <= nearTargetThreshold) {
+            // NEAR TARGET: within ±10% of ideal - small constant refill
+            refillAmount = 5;
+        } else {
+            // HYPOVOLEMIC: <-10% below target - 10% of current volume
+            refillAmount = Math.min(currentTotalVolume * 0.10, 300); // Cap at 300mL
+        }
+
+        return Math.round(refillAmount);
+    }
+
+    // Execute plasma refill
+    function executeRefill() {
+        // Don't refill if slider is being actively adjusted
+        if (isSliderActive) return;
+
+        const refillAmount = calculateRefillAmount();
+
+        if (refillAmount > 0) {
+            const currentPlasma = parseInt(slider.value);
+            const newPlasma = Math.min(currentPlasma + refillAmount, parseInt(slider.max));
+
+            // Update slider value
+            slider.value = newPlasma;
+
+            // Update the app
+            updateApp();
+
+            // Show toast notification
+            showRefillToast(refillAmount);
+        }
+    }
+
+    // Show refill toast notification
+    function showRefillToast(amount) {
+        refillToast.textContent = `plasma refilled!`;
+        refillToast.classList.add('show');
+
+        setTimeout(() => {
+            refillToast.classList.remove('show');
+        }, 1500);
+    }
+
+    // Start/stop automatic refill
+    function updateRefillMode() {
+        // Clear existing interval
+        if (refillInterval) {
+            clearInterval(refillInterval);
+            refillInterval = null;
+        }
+
+        // Start automatic refill if toggle is checked
+        if (refillToggle.checked) {
+            refillInterval = setInterval(executeRefill, 15000); // Every 15 seconds
+        }
+    }
+
+    // Event Listeners
     slider.addEventListener('input', updateApp);
-    
-    // Initial call
-    updateApp();
+
+    // Track slider activity to pause refill
+    slider.addEventListener('mousedown', () => { isSliderActive = true; });
+    slider.addEventListener('mouseup', () => { isSliderActive = false; });
+    slider.addEventListener('touchstart', () => { isSliderActive = true; });
+    slider.addEventListener('touchend', () => { isSliderActive = false; });
+
+    // Refill toggle
+    refillToggle.addEventListener('change', updateRefillMode);
+
+    // Scenario selector
+    scenarioSelect.addEventListener('change', (e) => {
+        loadScenario(e.target.value);
+    });
+
+    // Initialize
+    loadScenario('scenario1'); // Load default scenario
+    updateRefillMode();
 
 </script>
 
